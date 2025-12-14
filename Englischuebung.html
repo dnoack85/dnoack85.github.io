@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇬🇧 English Master Class 8</title>
+    <style>
+        /* Modernes, spielerisches Design */
+        :root {
+            --primary: #6C63FF;
+            --secondary: #4CAF50;
+            --danger: #FF5252;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 { color: var(--primary); margin-bottom: 0.5rem; }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            background: #eee;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 70%;
+            text-align: center;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+        .btn:active { transform: scale(0.95); }
+
+        .btn-option {
+            background: #fff;
+            color: #333;
+            border: 2px solid var(--primary);
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .btn-option:hover { background: #f0f0ff; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+        }
+        .feedback.correct { background: #d4edda; color: #155724; }
+        .feedback.wrong { background: #f8d7da; color: #721c24; }
+
+        .hidden { display: none; }
+
+        /* Animation für falsche Antworten */
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>🇬🇧 English Master Class 8</h1>
+        <p>Bereit für deine Englischarbeit?</p>
+        <p>Themen: <b>Countable/Uncountable Nouns</b> & <b>If-Clauses</b></p>
+        <p>⚠️ Wichtig: Wenn du eine Frage falsch machst, kommt sie später nochmal!</p>
+        <button class="btn" onclick="startGame()">Let's go! 🚀</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="score-board">
+            <span>Score: <span id="score">0</span> 🏆</span>
+            <span>Question: <span id="q-num">1</span></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+        <div class="question-box" id="question-text">
+            </div>
+
+        <div class="input-area" id="input-container">
+            </div>
+
+        <div id="feedback-msg" class="feedback"></div>
+        
+        <button id="next-btn" class="btn hidden" onclick="nextQuestion()">Next Question ➡️</button>
+    </div>
+
+    <div id="end-screen" class="hidden">
+        <h1>Great Job! 🎉</h1>
+        <p>Du hast alle Aufgaben gemeistert.</p>
+        <h2 id="final-score"></h2>
+        <p>Du bist bereit für die Arbeit!</p>
+        <button class="btn" onclick="location.reload()">Nochmal spielen 🔄</button>
+    </div>
+</div>
+
+<script>
+    // --- DATENBANK DER FRAGEN (50 Fragen) ---
+    const questionBank = [
+        // --- COUNTABLE / UNCOUNTABLE NOUNS ---
+        
+        // Basics & Tricky Words
+        { type: 'choice', q: "Is 'water' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Flüssigkeiten sind meistens uncountable." },
+        { type: 'choice', q: "Is 'information' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Im Englischen hat Information keine Mehrzahl." },
+        { type: 'choice', q: "Is 'furniture' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Möbel sind im Englischen eine nicht zählbare Gruppe." },
+        { type: 'choice', q: "Is 'money' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Man zählt Münzen (coins), aber nicht 'Geld' allgemein." },
+        { type: 'choice', q: "Is 'suggestion' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Countable", hint: "Man kann 'one suggestion, two suggestions' sagen." },
+        { type: 'choice', q: "Is 'luggage' (Gepäck) countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Luggage hat keinen Plural. Koffer (suitcases) sind zählbar." },
+        { type: 'choice', q: "Is 'bread' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Brot ist Masse. Man sagt 'a slice of bread'." },
+        { type: 'choice', q: "Is 'news' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "News endet auf 's', ist aber Singular und unzählbar!" },
+        { type: 'choice', q: "Is 'accident' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Countable", hint: "Man kann Unfälle zählen." },
+        { type: 'choice', q: "Is 'homework' countable or uncountable?", options: ["Countable", "Uncountable"], a: "Uncountable", hint: "Hausaufgaben sind im Englischen immer Singular/Uncountable." },
+
+        // Much vs. Many
+        { type: 'choice', q: "How ___ friends do you have?", options: ["much", "many"], a: "many", hint: "Friends sind zählbar -> many." },
+        { type: 'choice', q: "How ___ time do we have left?", options: ["much", "many"], a: "much", hint: "Time (Zeit) ist unzählbar -> much." },
+        { type: 'choice', q: "I don't have ___ work to do.", options: ["much", "many"], a: "much", hint: "Work (Arbeit) ist unzählbar." },
+        { type: 'choice', q: "There are too ___ people in the room.", options: ["much", "many"], a: "many", hint: "People ist der Plural von Person -> many." },
+        
+        // Some vs. Any
+        { type: 'choice', q: "Can I have ___ water, please?", options: ["some", "any"], a: "some", hint: "Bei einer Bitte nutzen wir 'some', auch wenn es eine Frage ist." },
+        { type: 'choice', q: "We don't have ___ milk left.", options: ["some", "any"], a: "any", hint: "Verneinung (don't) -> any." },
+        { type: 'choice', q: "Have you got ___ brothers or sisters?", options: ["some", "any"], a: "any", hint: "In normalen Fragen nutzen wir 'any'." },
+        { type: 'choice', q: "Look! I bought ___ apples.", options: ["some", "any"], a: "some", hint: "Bejahter Aussagesatz -> some." },
+
+        // A little vs. A few
+        { type: 'choice', q: "Can you wait ___ minutes?", options: ["a little", "a few"], a: "a few", hint: "Minutes sind zählbar -> a few." },
+        { type: 'choice', q: "I only have ___ money.", options: ["a little", "a few"], a: "a little", hint: "Money ist unzählbar -> a little." },
+        { type: 'choice', q: "There is ___ traffic today.", options: ["a little", "a few"], a: "a little", hint: "Traffic ist unzählbar." },
+
+        // Grammar Check (Verb Forms)
+        { type: 'text', q: "The news ___ (be) very interesting.", a: "is", hint: "News ist Uncountable -> Singular (is)." },
+        { type: 'text', q: "Your hair ___ (look) nice today.", a: "looks", hint: "Hair (als Frisur) ist Uncountable -> Singular." },
+        { type: 'text', q: "The police ___ (be) here.", a: "are", hint: "ACHTUNG: Police wird immer als Plural behandelt -> are!" },
+        
+        // --- IF-CLAUSES TYPE 1 (Real condition) ---
+        // If + Simple Present | Will-Future
+        { type: 'text', q: "Type 1: If it rains, I _____ (stay) at home.", a: "will stay", hint: "Type 1 Main clause: will + infinitive." },
+        { type: 'text', q: "Type 1: If you _____ (not/hurry), you will miss the bus.", a: "do not hurry", hint: "Type 1 If-clause: Simple Present (Verneinung mit do)." },
+        { type: 'text', q: "Type 1: He will pass the exam if he _____ (study) hard.", a: "studies", hint: "Type 1 If-clause: Simple Present (he/she/it -> das s muss mit!)." },
+        { type: 'text', q: "Type 1: If I _____ (go) to London, I will visit the museum.", a: "go", hint: "Type 1 If-clause: Simple Present." },
+        { type: 'text', q: "Type 1: She _____ (be) happy if you call her.", a: "will be", hint: "Type 1 Main clause: will + be." },
+
+        // --- IF-CLAUSES TYPE 2 (Unreal condition present) ---
+        // If + Simple Past | Would + Infinitive
+        { type: 'text', q: "Type 2: If I were you, I _____ (go) to the doctor.", a: "would go", hint: "Type 2 Main clause: would + infinitive." },
+        { type: 'text', q: "Type 2: If I _____ (have) a million dollars, I would buy a house.", a: "had", hint: "Type 2 If-clause: Simple Past." },
+        { type: 'text', q: "Type 2: She would travel around the world if she _____ (be) rich.", a: "were", hint: "Type 2 If-clause: 'were' wird oft für alle Personen genutzt." },
+        { type: 'text', q: "Type 2: If we lived in Spain, we _____ (speak) Spanish.", a: "would speak", hint: "Type 2 Main clause: would + infinitive." },
+        { type: 'text', q: "Type 2: If he _____ (know) the answer, he would tell us.", a: "knew", hint: "Type 2 If-clause: Simple Past (irregular verb!)." },
+        { type: 'text', q: "Type 2: What _____ (you/do) if you saw a ghost?", a: "would you do", hint: "Type 2 Frage: would + subject + infinitive." },
+
+        // --- IF-CLAUSES TYPE 3 (Unreal condition past) ---
+        // If + Past Perfect | Would + Have + Past Participle
+        { type: 'text', q: "Type 3: If you had studied, you _____ (pass) the test.", a: "would have passed", hint: "Type 3 Main clause: would have + 3. Form." },
+        { type: 'text', q: "Type 3: If I _____ (ask) him, he would have helped.", a: "had asked", hint: "Type 3 If-clause: Past Perfect (had + 3. Form)." },
+        { type: 'text', q: "Type 3: We would have gone to the beach if it _____ (not/rain).", a: "had not rained", hint: "Type 3 If-clause: Past Perfect negated." },
+        { type: 'text', q: "Type 3: If they _____ (take) the map, they wouldn't have got lost.", a: "had taken", hint: "Type 3 If-clause: Past Perfect." },
+        { type: 'text', q: "Type 3: She _____ (not/be) tired if she had gone to bed earlier.", a: "would not have been", hint: "Type 3 Main: would not have + 3. Form (been)." },
+
+        // --- MIXED TYPES Identification ---
+        { type: 'choice', q: "Which Type? 'If I go, I will see him.'", options: ["Type 1", "Type 2", "Type 3"], a: "Type 1", hint: "Present + Will = Type 1 (Real)." },
+        { type: 'choice', q: "Which Type? 'If I had gone, I would have seen him.'", options: ["Type 1", "Type 2", "Type 3"], a: "Type 3", hint: "Had gone + Would have seen = Type 3 (Past)." },
+        { type: 'choice', q: "Which Type? 'If I went, I would see him.'", options: ["Type 1", "Type 2", "Type 3"], a: "Type 2", hint: "Past + Would = Type 2 (Unreal Present)." },
+        
+        // --- TRANSLATION / COMPREHENSION ---
+        { type: 'choice', q: "Translate: 'Ratschlag'", options: ["Advice", "Advices"], a: "Advice", hint: "Es gibt kein 'Advices' im Englischen." },
+        { type: 'text', q: "Correct the sentence: 'I have two informations.' (Write full sentence)", a: "I have two pieces of information", hint: "Information ist unzählbar. Nutze 'pieces of'." },
+        { type: 'text', q: "Correct the sentence: 'The furniture are old.'", a: "The furniture is old", hint: "Furniture ist Singular." },
+        { type: 'text', q: "Complete with Type 2: If I _____ (can) fly, I would visit you.", a: "could", hint: "Past tense of can -> could." },
+        { type: 'text', q: "Complete with Type 1: Use 'not/be': If he _____ late, we will start without him.", a: "is not", hint: "Simple present of to be -> is/am/are." }
+    ];
+
+    // --- SPIEL LOGIK ---
+    let queue = [];
+    let score = 0;
+    let currentQ = null;
+    let totalInitialQuestions = 0;
+    let answeredCount = 0;
+
+    function startGame() {
+        // Fragen mischen
+        queue = [...questionBank].sort(() => Math.random() - 0.5);
+        totalInitialQuestions = queue.length; // Für Progress Bar Logik (ungefähr)
+        
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        loadNextQuestion();
+    }
+
+    function loadNextQuestion() {
+        if (queue.length === 0) {
+            endGame();
+            return;
+        }
+
+        currentQ = queue.shift(); // Erste Frage nehmen
+        
+        // UI Updates
+        document.getElementById('q-num').innerText = answeredCount + 1;
+        document.getElementById('question-text').innerText = currentQ.q;
+        document.getElementById('feedback-msg').style.display = 'none';
+        document.getElementById('feedback-msg').className = 'feedback';
+        document.getElementById('next-btn').classList.add('hidden');
+        
+        const inputContainer = document.getElementById('input-container');
+        inputContainer.innerHTML = '';
+
+        if (currentQ.type === 'choice') {
+            currentQ.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, false);
+                inputContainer.appendChild(btn);
+            });
+        } else {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'text-answer';
+            input.placeholder = 'Deine Antwort...';
+            input.autocomplete = "off";
+            
+            // Enter Taste erlaubt absenden
+            input.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    checkAnswer(this.value, true);
+                }
+            });
+
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = 'Check ✔️';
+            btn.onclick = () => {
+                const val = document.getElementById('text-answer').value;
+                checkAnswer(val, true);
+            };
+            
+            inputContainer.appendChild(input);
+            inputContainer.appendChild(btn);
+            input.focus();
+        }
+    }
+
+    function checkAnswer(userAnswer, isText) {
+        if(!userAnswer) return;
+
+        // Normalisieren (Kleinbuchstaben, Leerzeichen weg, Satzzeichen am Ende weg)
+        let cleanUser = userAnswer.toLowerCase().trim().replace(/[.!]+$/, "");
+        let cleanCorrect = currentQ.a.toLowerCase().trim().replace(/[.!]+$/, "");
+
+        // Sonderfall für Kurzformen (don't = do not)
+        cleanUser = cleanUser.replace("don't", "do not").replace("doesn't", "does not").replace("didn't", "did not").replace("won't", "will not");
+        cleanCorrect = cleanCorrect.replace("don't", "do not").replace("doesn't", "does not").replace("didn't", "did not").replace("won't", "will not");
+
+        const feedbackEl = document.getElementById('feedback-msg');
+        const nextBtn = document.getElementById('next-btn');
+        const inputContainer = document.getElementById('input-container');
+
+        // Eingabe sperren
+        if(isText) {
+            document.getElementById('text-answer').disabled = true;
+        } else {
+            const btns = inputContainer.getElementsByTagName('button');
+            for(let b of btns) b.disabled = true;
+        }
+
+        if (cleanUser === cleanCorrect) {
+            // RICHTIG
+            score += 10;
+            document.getElementById('score').innerText = score;
+            feedbackEl.innerText = "Correct! 🎉 Super gemacht.";
+            feedbackEl.classList.add('correct');
+            answeredCount++;
+            updateProgress();
+        } else {
+            // FALSCH
+            feedbackEl.innerHTML = `Wrong! 😕 <br> Correct answer: <b>${currentQ.a}</b><br><i>Tip: ${currentQ.hint}</i>`;
+            feedbackEl.classList.add('wrong');
+            document.querySelector('.container').classList.add('shake');
+            setTimeout(() => document.querySelector('.container').classList.remove('shake'), 500);
+            
+            // Frage hinten anstellen (Wiederholung)
+            queue.push(currentQ);
+        }
+
+        feedbackEl.style.display = 'block';
+        nextBtn.classList.remove('hidden');
+        nextBtn.focus();
+    }
+
+    function updateProgress() {
+        // Einfache Logik: Wir schätzen den Fortschritt
+        let percent = (answeredCount / (totalInitialQuestions + 5)) * 100; // +5 Puffer für Fehler
+        if (percent > 100) percent = 100;
+        document.getElementById('progress').style.width = percent + "%";
+    }
+
+    function nextQuestion() {
+        loadNextQuestion();
+    }
+
+    function endGame() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `Total Score: ${score} Points`;
+        document.getElementById('progress').style.width = "100%";
+    }
+</script>
+
+</body>
+</html>
