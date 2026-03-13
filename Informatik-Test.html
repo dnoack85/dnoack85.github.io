@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informatik-Trainer: Rechnernetze</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --accent: #e94560;
+            --text: #ffffff;
+            --correct: #2ecc71;
+            --wrong: #e74c3c;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .quiz-container { background: var(--card-bg); padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--accent); font-size: 1.5rem; margin-top: 0; text-align: center; }
+        .progress-container { background: #0f3460; height: 12px; border-radius: 6px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
+        .question { font-size: 1.2rem; margin-bottom: 20px; line-height: 1.4; }
+        .options { display: grid; gap: 10px; }
+        .option { background: #0f3460; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+        .option:hover { border-color: var(--accent); background: #1a1a2e; }
+        .option.correct { background: var(--correct) !important; border-color: var(--correct); color: #000; font-weight: bold; }
+        .option.wrong { background: var(--wrong) !important; border-color: var(--wrong); }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; background: rgba(255,255,255,0.1); font-size: 0.95rem; line-height: 1.5; }
+        button { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; margin-top: 20px; display: none; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        .math { font-family: 'Courier New', Courier, monospace; background: #000; padding: 2px 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quiz-box">
+        <h1>🌐 Netzwerk-Check 8. Klasse</h1>
+        <div class="progress-container"><div class="progress-bar" id="bar"></div></div>
+        <div id="display">
+            <div class="question" id="q-text">Lade Fragen...</div>
+            <div class="options" id="opt-container"></div>
+            <div class="feedback" id="fb-text"></div>
+            <button id="next-btn" onclick="nextQuestion()">Nächste Frage</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Was ist die Hauptaufgabe einer IP-Adresse?", a: ["Sie ist der Name des Herstellers", "Eindeutige Adresse für Geräte im Netz", "Sie verschlüsselt die Festplatte", "Sie verbindet Computer ohne Kabel"], c: 1, r: "Wie eine Postanschrift sorgt sie dafür, dass Datenpakete den richtigen Empfänger finden." },
+            { q: "Aus wie vielen Oktetten besteht eine IPv4-Adresse?", a: ["2", "4", "6", "12"], c: 1, r: "Eine IPv4-Adresse besteht aus vier Zahlengruppen, die durch Punkte getrennt sind." },
+            { q: "Welches Werkzeug trennt Netzwerk-ID von Host-ID?", a: ["DNS-Server", "Netzmaske", "MAC-Adresse", "E-Mail-Protokoll"], c: 1, r: "Die Netzmaske (z.B. 255.255.255.0) definiert, welcher Teil der Adresse das Netz beschreibt." },
+            { q: "Was zeichnet eine MAC-Adresse aus?", a: ["Vom Benutzer frei wählbar", "Besteht nur aus Nullen und Einsen", "Theoretisch weltweit einzigartig", "Wird nur für Webseiten genutzt"], c: 2, r: "Die MAC-Adresse ist fest in die Hardware eingebaut und dient zur Identifizierung des Netzwerkadapters." },
+            { q: "Wie werden Oktetten einer MAC-Adresse getrennt?", a: ["Punkte (.)", "Schrägstriche (/)", "Doppelpunkte (:)", "Leerzeichen"], c: 2, r: "In der Schreibweise werden die 6 Hex-Oktetten durch Doppelpunkte gegliedert." },
+            { q: "Warum nutzen Computer intern das Binärsystem?", a: ["Bessere Lesbarkeit", "Technische Unterscheidung von zwei Zuständen", "Verbraucht mehr Speicher", "Enthält Ziffern 0-9"], c: 1, r: "Computer arbeiten mit Stromzuständen (An/Aus), was perfekt durch 0 und 1 dargestellt wird." },
+            { q: "Was ergibt 1100 im Binärsystem?", a: ["3", "10", "12", "15"], c: 2, r: "Rechnung: 1x8 + 1x4 + 0x2 + 0x1 = 12." },
+            { q: "Welche Zeichen nutzt das Hexadezimalsystem?", a: ["0 und 1", "0-9", "0-9 und A-F", "Nur A-Z"], c: 2, r: "Hexadezimal bedeutet Basis 16, daher nutzt man Ziffern bis 9 und Buchstaben bis F." },
+            { q: "Vorteil des Hexadezimalsystems?", a: ["Macht den PC schneller", "Bessere Lesbarkeit langer Binärzahlen", "Ersetzt das IP-Protokoll", "Funktioniert ohne Strom"], c: 1, r: "Es fasst 4 Bits zu einem Zeichen zusammen und ist so kompakter für Menschen." },
+            { q: "Was beschreibt ein LAN?", a: ["Weltweites Netzwerk", "Lokales Netz in begrenztem Bereich", "System für kabellose Drucker", "Protokoll für Briefe"], c: 1, r: "LAN steht für Local Area Network, also ein örtlich begrenztes Netz." },
+            { q: "Warum ist ein Hub ineffizient?", a: ["Zu hoher Stromverbrauch", "Sende Daten einfach an ALLE Geräte", "Kann keine Kabel nutzen", "Zu groß für Büros"], c: 1, r: "Ein Hub 'schreit' die Daten an alle Ports, statt sie gezielt zu lenken." },
+            { q: "Welches Gerät verbindet verschiedene Netzwerke?", a: ["Switch", "Router", "Hub", "Monitor"], c: 1, r: "Ein Router vermittelt Datenpakete zwischen unterschiedlichen Netzen (z.B. Heimnetz und Internet)." },
+            { q: "Was ist in einer Fritzbox meist eingebaut?", a: ["Nur WLAN", "DHCP, Switch, Router, Firewall", "Drucker und Scanner", "Satellitenempfänger"], c: 1, r: "Moderne Heimrouter sind Kombigeräte, die viele Netzwerkaufgaben übernehmen." },
+            { q: "Wofür steht DNS?", a: ["Digital Network Safety", "Domain Name System", "Data Number Storage", "Direct Network Switch"], c: 1, r: "Das DNS übersetzt Namen wie 'youtube.de' in IP-Adressen." },
+            { q: "Welches Protokoll weist automatisch IPs zu?", a: ["HTTP", "DHCP", "ICMP", "SMTP"], c: 1, r: "DHCP (Dynamic Host Configuration Protocol) automatisiert die Netzwerkeinrichtung." },
+            { q: "Warum ist SSH besser als Telnet?", a: ["Ist bunter", "Daten werden verschlüsselt übertragen", "Braucht kein Internet", "Von Microsoft erfunden"], c: 1, r: "SSH schützt Passwörter und Daten durch Verschlüsselung vor Mitlesern." },
+            { q: "Protokoll für Datei-Upload/Download?", a: ["FTP / SFTP", "DNS", "SMTP", "ICMP"], c: 0, r: "FTP steht direkt für 'File Transfer Protocol'." },
+            { q: "Wofür wird ICMP genutzt?", a: ["Online-Shopping", "Netzwerkdiagnose (Ping)", "Videos schauen", "Passwörter speichern"], c: 1, r: "Mit ICMP prüfen Computer die Erreichbarkeit anderer Geräte." },
+            { q: "Welches Protokoll SENDET E-Mails?", a: ["IMAP", "SMTP", "POP3", "HTTP"], c: 1, r: "SMTP ist für den Postausgang zuständig." },
+            { q: "Unterschied IMAP zu POP3?", a: ["IMAP nur für Bilder", "IMAP synchronisiert mit dem Server", "POP3 ist sicherer", "IMAP nur im WLAN"], c: 1, r: "IMAP lässt die Mails auf dem Server, sodass sie auf allen Geräten synchron sind." }
+        ];
+
+        let current = 0;
+        let score = 0;
+
+        function showQuestion() {
+            const q = questions[current];
+            document.getElementById("q-text").innerText = `${current + 1}. ${q.q}`;
+            document.getElementById("fb-text").style.display = "none";
+            document.getElementById("next-btn").style.display = "none";
+            const container = document.getElementById("opt-container");
+            container.innerHTML = "";
+            
+            q.a.forEach((opt, i) => {
+                const div = document.createElement("div");
+                div.className = "option";
+                div.innerText = opt;
+                div.onclick = () => checkAnswer(i, div);
+                container.appendChild(div);
+            });
+            document.getElementById("bar").style.width = ((current) / questions.length) * 100 + "%";
+        }
+
+        function checkAnswer(idx, element) {
+            const q = questions[current];
+            const allOptions = document.getElementsByClassName("option");
+            for(let opt of allOptions) opt.onclick = null;
+
+            if(idx === q.c) {
+                element.classList.add("correct");
+                score++;
+            } else {
+                element.classList.add("wrong");
+                allOptions[q.c].classList.add("correct");
+            }
+
+            const fb = document.getElementById("fb-text");
+            fb.innerHTML = `<strong>Erklärung:</strong> ${q.r}`;
+            fb.style.display = "block";
+            document.getElementById("next-btn").style.display = "block";
+        }
+
+        function nextQuestion() {
+            current++;
+            if(current < questions.length) {
+                showQuestion();
+            } else {
+                document.getElementById("bar").style.width = "100%";
+                document.getElementById("display").innerHTML = `
+                    <div style="text-align:center; padding: 20px;">
+                        <h2 style="color:var(--correct)">Fertig! 🎉</h2>
+                        <p style="font-size:1.5rem">Du hast ${score} von ${questions.length} Punkten erreicht.</p>
+                        <p>${score > 15 ? 'Super! Du bist perfekt vorbereitet.' : 'Schau dir die falschen Antworten nochmal an.'}</p>
+                        <button onclick="location.reload()">Test wiederholen</button>
+                    </div>
+                `;
+            }
+        }
+        showQuestion();
+    </script>
+</body>
+</html>
